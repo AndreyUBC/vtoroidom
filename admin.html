@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Панель управления | Второй Дом</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1a2a3a;
+      --blue:   #2c4a6e;
+      --gold:   #c8973a;
+      --gold2:  #a87830;
+      --light:  #f5f2ee;
+      --white:  #ffffff;
+      --gray:   #6b7280;
+      --border: #ddd6cd;
+      --red:    #c0392b;
+      --green:  #1e7e4a;
+      --sidebar-w: 220px;
+    }
+
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0ece6; color: #1a1a1a; min-height: 100vh; }
+
+    /* ── Login screen ─────────────────── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--navy);
+    }
+    .login-box {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 44px 40px 40px;
+      width: 360px;
+      box-shadow: 0 12px 48px rgba(0,0,0,.35);
+      text-align: center;
+    }
+    .login-box .logo { font-size: 1.4rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .login-box .logo span { color: var(--gold); }
+    .login-box .subtitle { font-size: .85rem; color: var(--gray); margin-bottom: 28px; }
+    .login-box label { display: block; text-align: left; font-size: .82rem; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+    .login-box input[type="password"] {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: .95rem; outline: none; margin-bottom: 18px;
+    }
+    .login-box input[type="password"]:focus { border-color: var(--gold); }
+    .login-btn {
+      width: 100%; background: var(--gold); color: var(--white);
+      border: none; border-radius: 6px; padding: 11px; font-size: .95rem;
+      font-weight: 700; cursor: pointer; transition: background .18s;
+    }
+    .login-btn:hover { background: var(--gold2); }
+    .login-error { color: var(--red); font-size: .83rem; margin-top: 12px; display: none; }
+
+    /* ── App shell ────────────────────── */
+    #app { display: none; min-height: 100vh; }
+
+    /* Topbar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 52px;
+      background: var(--navy); display: flex; align-items: center;
+      padding: 0 20px; gap: 14px; z-index: 200;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .topbar .tlogo { font-weight: 700; font-size: 1rem; color: var(--white); }
+    .topbar .tlogo span { color: var(--gold); }
+    .topbar .badge { background: var(--gold); color: var(--white); font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: .05em; text-transform: uppercase; }
+    .topbar .spacer { flex: 1; }
+    .topbar .site-link { color: rgba(255,255,255,.7); font-size: .82rem; text-decoration: none; }
+    .topbar .site-link:hover { color: var(--gold); }
+    .logout-btn { background: none; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.7); border-radius: 5px; padding: 5px 12px; font-size: .8rem; cursor: pointer; }
+    .logout-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 52px; left: 0; bottom: 0;
+      width: var(--sidebar-w); background: var(--white);
+      border-right: 1px solid var(--border); overflow-y: auto;
+      padding: 16px 0; z-index: 100;
+    }
+    .sidebar-section { padding: 8px 16px 4px; font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); }
+    .sidebar a {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 20px; font-size: .88rem; color: #333;
+      text-decoration: none; transition: background .15s, color .15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar a:hover { background: var(--light); color: var(--navy); }
+    .sidebar a.active { background: #fdf6ec; color: var(--gold2); border-left-color: var(--gold); font-weight: 600; }
+    .sidebar .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* Main content */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      margin-top: 52px;
+      padding: 28px 32px 60px;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-title { font-size: 1.3rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .panel-sub { font-size: .88rem; color: var(--gray); margin-bottom: 28px; }
+
+    /* Cards */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 24px 26px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .card-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title .icon { font-size: 1.1rem; }
+
+    /* Form fields */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: .8rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+    .field input, .field textarea {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: .93rem; font-family: inherit;
+      outline: none; transition: border .18s; resize: vertical;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--gold); }
+    .field textarea { min-height: 90px; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Photo manager */
+    .photo-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .photo-item {
+      position: relative; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden;
+      background: var(--light);
+    }
+    .photo-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+    .photo-item .photo-label { font-size: .72rem; padding: 5px 8px; color: var(--gray); background: var(--white); word-break: break-all; }
+    .photo-item .remove-photo {
+      position: absolute; top: 5px; right: 5px; background: rgba(192,57,43,.85);
+      color: white; border: none; border-radius: 50%; width: 22px; height: 22px;
+      font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .add-photo-row { display: flex; gap: 10px; align-items: flex-end; }
+    .add-photo-row .field { flex: 1; margin: 0; }
+    .add-btn {
+      background: var(--navy); color: var(--white); border: none; border-radius: 6px;
+      padding: 9px 16px; font-size: .88rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .add-btn:hover { background: var(--blue); }
+
+    .upload-hint { font-size: .78rem; color: var(--gray); margin-top: 6px; }
+
+    /* Generate button */
+    .generate-bar {
+      position: sticky; bottom: 0; background: var(--white);
+      border-top: 1px solid var(--border); padding: 14px 26px;
+      display: flex; align-items: center; gap: 14px; margin: 28px -26px -24px;
+      border-radius: 0 0 10px 10px;
+    }
+    .gen-btn {
+      background: var(--gold); color: var(--white); border: none; border-radius: 6px;
+      padding: 10px 22px; font-size: .92rem; font-weight: 700; cursor: pointer;
+    }
+    .gen-btn:hover { background: var(--gold2); }
+    .gen-hint { font-size: .82rem; color: var(--gray); }
+
+    /* Output modal */
+    #output-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 500;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #output-modal.open { display: flex; }
+    .modal-box {
+      background: var(--white); border-radius: 12px; max-width: 760px; width: 100%;
+      max-height: 85vh; display: flex; flex-direction: column;
+      box-shadow: 0 16px 60px rgba(0,0,0,.35);
+    }
+    .modal-header {
+      padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 1rem; color: var(--navy); }
+    .modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--gray); }
+    .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+
+    .code-block {
+      background: #1e2d3d; color: #e8f0f8; font-family: 'Courier New', monospace;
+      font-size: .8rem; line-height: 1.6; border-radius: 8px;
+      padding: 16px 18px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+      margin-bottom: 16px; max-height: 300px; overflow-y: auto;
+    }
+    .step-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--gold); color: var(--white); width: 22px; height: 22px;
+      border-radius: 50%; font-size: .75rem; font-weight: 700; margin-right: 8px;
+    }
+    .step-label { font-size: .9rem; color: var(--navy); font-weight: 600; margin-bottom: 10px; }
+
+    .copy-btn {
+      background: var(--navy); color: var(--white); border: none; border-radius: 6px;
+      padding: 8px 18px; font-size: .85rem; font-weight: 600; cursor: pointer;
+    }
+    .copy-btn:hover { background: var(--blue); }
+    .copy-btn.copied { background: var(--green); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--navy); color: var(--white);
+      padding: 10px 20px; border-radius: 8px; font-size: .88rem;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
+    /* Change-password form */
+    .narrow { max-width: 420px; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .sidebar { transform: translateX(-100%); transition: transform .2s; }
+      .sidebar.open { transform: none; }
+      .main-content { margin-left: 0; padding: 16px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOGIN
+════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="logo">Второй <span>Дом</span></div>
+    <div class="subtitle">Панель управления сайтом</div>
+    <label for="pwd-input">Пароль</label>
+    <input type="password" id="pwd-input" placeholder="Введите пароль" autocomplete="current-password">
+    <button class="login-btn" id="login-btn">Войти</button>
+    <div class="login-error" id="login-error">Неверный пароль</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     APP
+════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="tlogo">Второй <span>Дом</span></span>
+    <span class="badge">Админ</span>
+    <div class="spacer"></div>
+    <a class="site-link" href="index.html" target="_blank">← На сайт</a>
+    <button class="logout-btn" id="logout-btn">Выйти</button>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">Контент</div>
+    <a href="#" class="active" data-panel="home"><span class="icon">🏠</span> Главная</a>
+    <a href="#" data-panel="vagapova"><span class="icon">📍</span> Вагапова 5Г</a>
+    <a href="#" data-panel="kutua"><span class="icon">📍</span> А. Кутуя 86/2</a>
+    <a href="#" data-panel="booking"><span class="icon">📞</span> Бронирование</a>
+    <a href="#" data-panel="about"><span class="icon">📋</span> О нас</a>
+
+    <div class="sidebar-section" style="margin-top:12px;">Фото</div>
+    <a href="#" data-panel="photos-vagapova"><span class="icon">🖼</span> Фото — Вагапова</a>
+    <a href="#" data-panel="photos-kutua"><span class="icon">🖼</span> Фото — Кутуя</a>
+
+    <div class="sidebar-section" style="margin-top:12px;">Настройки</div>
+    <a href="#" data-panel="settings"><span class="icon">🔑</span> Пароль</a>
+    <a href="#" data-panel="guide"><span class="icon">📖</span> Инструкция</a>
+  </nav>
+
+  <!-- Main content -->
+  <div class="main-content">
+
+    <!-- ── ГЛАВНАЯ ── -->
+    <div class="panel active" id="panel-home">
+      <div class="panel-title">Главная страница</div>
+      <div class="panel-sub">Редактировать текст на главной (index.html)</div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">✏️</span> Герой-блок</div>
+        <div class="field"><label>Надпись над заголовком (eyebrow)</label><input type="text" id="home-eyebrow" value="Будьте как дома — вдали от дома"></div>
+        <div class="field"><label>Заголовок (H1)</label><input type="text" id="home-h1" value="Хостел «Второй Дом» в Казани"></div>
+        <div class="field"><label>Подзаголовок</label><textarea id="home-sub">Два уютных хостела в Советском районе: рядом с торговыми центрами, ипподромом и основными достопримечательностями города.</textarea></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> Три блока статистики</div>
+        <div class="field-row">
+          <div class="field"><label>Блок 1 — подпись</label><input type="text" id="home-s1-label" value="Работаем с"></div>
+          <div class="field"><label>Блок 1 — значение</label><input type="text" id="home-s1-val" value="2007 года"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Блок 2 — подпись</label><input type="text" id="home-s2-label" value="Мест в двух хостелах"></div>
+          <div class="field"><label>Блок 2 — значение</label><input type="text" id="home-s2-val" value="более 700"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Блок 3 — подпись</label><input type="text" id="home-s3-label" value="Расчётный час"></div>
+          <div class="field"><label>Блок 3 — значение</label><input type="text" id="home-s3-val" value="Выезд 12:00 · Заезд 14:00"></div>
+        </div>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('home')">Сгенерировать код index.html</button>
+          <span class="gen-hint">Откроется окно с кодом для вставки в GitHub</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ВАГАПОВА ── -->
+    <div class="panel" id="panel-vagapova">
+      <div class="panel-title">Вагапова 5Г</div>
+      <div class="panel-sub">Редактировать страницу хостела (vagapova.html)</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🏢</span> Основная информация</div>
+        <div class="field"><label>Описание (абзац 1)</label><textarea id="vag-desc1">Хостел «Второй дом» по адресу ул. Рашида Вагапова, 5Г работает с 2007 года. Расположен в тихом спальном микрорайоне Азино-1 с развитой инфраструктурой — в шаговой доступности торговые центры, спортивные объекты и рестораны.</textarea></div>
+        <div class="field"><label>Описание (абзац 2)</label><textarea id="vag-desc2">В большинстве номеров имеются душ и туалет. На этажах оборудованы кухни. Гостям бесплатно предоставляются утюг и гладильная доска. Быстрый и бесплатный Wi-Fi. Обученный персонал готов решить любой вопрос, касающийся вашего проживания.</textarea></div>
+        <div class="field-row">
+          <div class="field"><label>Количество мест</label><input type="text" id="vag-beds" value="280 мест"></div>
+          <div class="field"><label>Количество номеров</label><input type="text" id="vag-rooms" value="49 номеров"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Адрес</label><input type="text" id="vag-addr" value="ул. Р. Вагапова, 5Г, Казань"></div>
+          <div class="field"><label>Телефон</label><input type="text" id="vag-phone" value="+7 (843) 276-44-04"></div>
+        </div>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('vagapova')">Сгенерировать код vagapova.html</button>
+          <span class="gen-hint">Откроется окно с кодом для вставки в GitHub</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── КУТУЯ ── -->
+    <div class="panel" id="panel-kutua">
+      <div class="panel-title">А. Кутуя 86/2</div>
+      <div class="panel-sub">Редактировать страницу хостела (kutua.html)</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🏢</span> Основная информация</div>
+        <div class="field"><label>Описание (абзац 1)</label><textarea id="kut-desc1">Хостел «Второй Дом» по адресу ул. Аделя Кутуя, 86/2 открыт в августе 2019 года. Рассчитан на 526 мест. Все номера с душем и туалетом. На этажах оборудованы кухни. Гостям бесплатно предоставляются утюг и гладильная доска. Быстрый и бесплатный Wi-Fi.</textarea></div>
+        <div class="field"><label>Описание (абзац 2)</label><textarea id="kut-desc2">В шаговой доступности от хостела располагаются Казанский ипподром, Парк им. Горького, Казанский кооперативный институт и офтальмологическая клиника.</textarea></div>
+        <div class="field-row">
+          <div class="field"><label>Количество мест</label><input type="text" id="kut-beds" value="526 мест"></div>
+          <div class="field"><label>Количество номеров</label><input type="text" id="kut-rooms" value="69 номеров"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Адрес</label><input type="text" id="kut-addr" value="ул. Аделя Кутуя, 86/2, Казань"></div>
+          <div class="field"><label>Телефон</label><input type="text" id="kut-phone" value="+7 (986) 934-04-86"></div>
+        </div>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('kutua')">Сгенерировать код kutua.html</button>
+          <span class="gen-hint">Откроется окно с кодом для вставки в GitHub</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── БРОНИРОВАНИЕ ── -->
+    <div class="panel" id="panel-booking">
+      <div class="panel-title">Бронирование</div>
+      <div class="panel-sub">Контакты для бронирования (booking.html)</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📞</span> Контакты</div>
+        <div class="field-row">
+          <div class="field"><label>Телефон — Вагапова</label><input type="text" id="bk-phone-vag" value="+7 (843) 276-44-04"></div>
+          <div class="field"><label>Телефон — Кутуя</label><input type="text" id="bk-phone-kut" value="+7 (986) 934-04-86"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>E-mail для бронирования</label><input type="text" id="bk-email" value="vtoroidom_brony@bk.ru"></div>
+          <div class="field"><label>Общий e-mail</label><input type="text" id="bk-email2" value="vtoroidom@bk.ru"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Час выезда</label><input type="text" id="bk-checkout" value="12:00"></div>
+          <div class="field"><label>Час заезда</label><input type="text" id="bk-checkin" value="14:00"></div>
+        </div>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('booking')">Сгенерировать код booking.html</button>
+          <span class="gen-hint">Откроется окно с кодом для вставки в GitHub</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── О НАС ── -->
+    <div class="panel" id="panel-about">
+      <div class="panel-title">О нас / Реквизиты</div>
+      <div class="panel-sub">Редактировать реквизиты (about.html)</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span> Реквизиты</div>
+        <div class="field"><label>Наименование ИП</label><input type="text" id="ab-name" value="ИП Абушахманова Гульнара Рафаиловна"></div>
+        <div class="field-row">
+          <div class="field"><label>ОГРН</label><input type="text" id="ab-ogrn" value="313169021100152 от 30.07.2013"></div>
+          <div class="field"><label>ИНН</label><input type="text" id="ab-inn" value="165601462000"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Р/сч</label><input type="text" id="ab-rsch" value="40802810029070000443"></div>
+          <div class="field"><label>БИК</label><input type="text" id="ab-bik" value="042202824"></div>
+        </div>
+        <div class="field"><label>Банк</label><input type="text" id="ab-bank" value="Филиал «Нижегородский» АО «АЛЬФА-БАНК»"></div>
+        <div class="field"><label>К/с</label><input type="text" id="ab-ksch" value="30101810200000000824"></div>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('about')">Сгенерировать код about.html</button>
+          <span class="gen-hint">Откроется окно с кодом для вставки в GitHub</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ФОТО ВАГАПОВА ── -->
+    <div class="panel" id="panel-photos-vagapova">
+      <div class="panel-title">Фото — Вагапова 5Г</div>
+      <div class="panel-sub">Управление фотографиями для этого хостела</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🖼</span> Текущие фото</div>
+        <div class="photo-list" id="photos-vag-list"></div>
+        <div class="add-photo-row">
+          <div class="field"><label>URL новой фотографии</label><input type="text" id="new-photo-vag" placeholder="https://..."></div>
+          <button class="add-btn" onclick="addPhoto('vag')">+ Добавить</button>
+        </div>
+        <p class="upload-hint">💡 Загрузите фото в папку <code>img/</code> своего GitHub-репозитория и вставьте относительный путь, например: <code>img/vagapova-room1.jpg</code> — или используйте любую прямую ссылку на изображение.</p>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('photos')">Сгенерировать код photos.html</button>
+          <span class="gen-hint">Обновит галерею для обоих хостелов</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ФОТО КУТУЯ ── -->
+    <div class="panel" id="panel-photos-kutua">
+      <div class="panel-title">Фото — А. Кутуя 86/2</div>
+      <div class="panel-sub">Управление фотографиями для этого хостела</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🖼</span> Текущие фото</div>
+        <div class="photo-list" id="photos-kut-list"></div>
+        <div class="add-photo-row">
+          <div class="field"><label>URL новой фотографии</label><input type="text" id="new-photo-kut" placeholder="https://..."></div>
+          <button class="add-btn" onclick="addPhoto('kut')">+ Добавить</button>
+        </div>
+        <p class="upload-hint">💡 Загрузите фото в папку <code>img/</code> своего GitHub-репозитория и вставьте относительный путь, например: <code>img/kutua-room1.jpg</code></p>
+        <div class="generate-bar">
+          <button class="gen-btn" onclick="generatePage('photos')">Сгенерировать код photos.html</button>
+          <span class="gen-hint">Обновит галерею для обоих хостелов</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── НАСТРОЙКИ ── -->
+    <div class="panel" id="panel-settings">
+      <div class="panel-title">Смена пароля</div>
+      <div class="panel-sub">Пароль хранится только в вашем браузере (localStorage).</div>
+      <div class="card narrow">
+        <div class="card-title"><span class="icon">🔑</span> Новый пароль</div>
+        <div class="field"><label>Текущий пароль</label><input type="password" id="s-cur-pwd"></div>
+        <div class="field"><label>Новый пароль</label><input type="password" id="s-new-pwd"></div>
+        <div class="field"><label>Повторите новый пароль</label><input type="password" id="s-new-pwd2"></div>
+        <button class="gen-btn" onclick="changePwd()">Сохранить пароль</button>
+        <div id="pwd-msg" style="margin-top:10px; font-size:.85rem;"></div>
+      </div>
+    </div>
+
+    <!-- ── ИНСТРУКЦИЯ ── -->
+    <div class="panel" id="panel-guide">
+      <div class="panel-title">Инструкция</div>
+      <div class="panel-sub">Как пользоваться панелью и публиковать изменения на сайте</div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📖</span> Как обновить сайт — пошагово</div>
+        <ol style="margin-left: 20px; line-height: 2.2; font-size: .93rem; color: #333;">
+          <li>Откройте нужный раздел в левом меню и отредактируйте текст или фото.</li>
+          <li>Нажмите кнопку <strong>«Сгенерировать код»</strong> — откроется окно с готовым HTML.</li>
+          <li>Нажмите <strong>«Скопировать»</strong>.</li>
+          <li>Откройте <a href="https://github.com" target="_blank">github.com</a> → ваш репозиторий.</li>
+          <li>Найдите нужный файл (например, <code>index.html</code>), кликните по нему.</li>
+          <li>Нажмите значок карандаша ✏️ (Edit this file) в правом верхнем углу.</li>
+          <li>Выделите весь текст (<kbd>Ctrl+A</kbd>) и вставьте скопированный код (<kbd>Ctrl+V</kbd>).</li>
+          <li>Нажмите <strong>Commit changes</strong> — сайт обновится автоматически через 1–2 минуты.</li>
+        </ol>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-title"><span class="icon">🖼</span> Как добавить своё фото</div>
+        <ol style="margin-left: 20px; line-height: 2.2; font-size: .93rem; color: #333;">
+          <li>В GitHub-репозитории откройте папку <code>img/</code> (или создайте её).</li>
+          <li>Нажмите <strong>Add file → Upload files</strong> и загрузите фотографии.</li>
+          <li>Скопируйте относительный путь, например: <code>img/room1.jpg</code></li>
+          <li>В этой панели откройте «Фото — Вагапова» или «Фото — Кутуя».</li>
+          <li>Вставьте путь в поле «URL новой фотографии» и нажмите <strong>+ Добавить</strong>.</li>
+          <li>Нажмите <strong>«Сгенерировать код photos.html»</strong> и опубликуйте, как описано выше.</li>
+        </ol>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-title"><span class="icon">🔐</span> Безопасность</div>
+        <p style="font-size:.92rem; color:#333; line-height:1.8;">Пароль хранится в браузере (<code>localStorage</code>). Эта панель — только для вас: она не подключена к интернету и не отправляет данные никуда. Если откроете сайт с другого компьютера, нужно будет снова установить пароль через раздел «Пароль».</p>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- ── Output modal ── -->
+<div id="output-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Готовый код</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="step-label"><span class="step-badge">1</span> Скопируйте код ниже</div>
+      <div class="code-block" id="modal-code"></div>
+      <div class="step-label"><span class="step-badge">2</span> Откройте файл в GitHub и вставьте его целиком (Ctrl+A → Ctrl+V → Commit)</div>
+    </div>
+    <div class="modal-footer">
+      <button class="copy-btn" id="copy-btn" onclick="copyCode()">Скопировать</button>
+      <button class="modal-close" style="background:var(--light); border:1px solid var(--border); border-radius:6px; padding:8px 16px; cursor:pointer; font-size:.88rem;" onclick="closeModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE — photo arrays
+═══════════════════════════════════════════ */
+const DEFAULT_PWD = 'vtoroidom2025';
+
+let photos = {
+  vag: [
+    'https://static.wixstatic.com/media/ed2355_7019d5cf54ce4a22b3521a14aa77e1f7~mv2_d_2016_1512_s_2.jpg/v1/crop/x_0,y_9,w_2016,h_1313/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_3450_JPG.jpg',
+    'https://static.wixstatic.com/media/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg',
+    'https://static.wixstatic.com/media/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg',
+    'https://static.wixstatic.com/media/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg',
+  ],
+  kut: [
+    'https://static.wixstatic.com/media/ed2355_b47c46227cf64e338a4138f1d340a6bf~mv2.jpeg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202020-07-23%20at%203_09_58%20PM_.jpeg',
+    'https://static.wixstatic.com/media/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg',
+    'https://static.wixstatic.com/media/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg',
+    'https://static.wixstatic.com/media/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg',
+  ]
+};
+
+/* ═══════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════ */
+function getStoredPwd() {
+  return localStorage.getItem('vd_admin_pwd') || DEFAULT_PWD;
+}
+
+document.getElementById('login-btn').addEventListener('click', tryLogin);
+document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+function tryLogin() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === getStoredPwd()) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderPhotoLists();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pwd-input').value = '';
+  }
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pwd-input').value = '';
+});
+
+function changePwd() {
+  const cur = document.getElementById('s-cur-pwd').value;
+  const n1  = document.getElementById('s-new-pwd').value;
+  const n2  = document.getElementById('s-new-pwd2').value;
+  const msg = document.getElementById('pwd-msg');
+  if (cur !== getStoredPwd()) { msg.style.color = '#c0392b'; msg.textContent = 'Текущий пароль неверный'; return; }
+  if (!n1) { msg.style.color = '#c0392b'; msg.textContent = 'Введите новый пароль'; return; }
+  if (n1 !== n2) { msg.style.color = '#c0392b'; msg.textContent = 'Пароли не совпадают'; return; }
+  localStorage.setItem('vd_admin_pwd', n1);
+  msg.style.color = '#1e7e4a'; msg.textContent = 'Пароль сохранён ✓';
+  document.getElementById('s-cur-pwd').value = '';
+  document.getElementById('s-new-pwd').value = '';
+  document.getElementById('s-new-pwd2').value = '';
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+document.querySelectorAll('.sidebar a[data-panel]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById('panel-' + link.dataset.panel).classList.add('active');
+  });
+});
+
+/* ═══════════════════════════════════════════
+   PHOTOS
+═══════════════════════════════════════════ */
+function renderPhotoLists() {
+  renderList('vag');
+  renderList('kut');
+}
+
+function renderList(key) {
+  const el = document.getElementById('photos-' + key + '-list');
+  if (!el) return;
+  el.innerHTML = photos[key].map((url, i) => `
+    <div class="photo-item">
+      <img src="${url}" alt="Фото ${i+1}" onerror="this.style.opacity='.3'">
+      <div class="photo-label">${url.length > 40 ? '...' + url.slice(-38) : url}</div>
+      <button class="remove-photo" onclick="removePhoto('${key}',${i})" title="Удалить">×</button>
+    </div>
+  `).join('');
+}
+
+function addPhoto(key) {
+  const input = document.getElementById('new-photo-' + key);
+  const url = input.value.trim();
+  if (!url) return;
+  photos[key].push(url);
+  renderList(key);
+  input.value = '';
+  showToast('Фото добавлено');
+}
+
+function removePhoto(key, idx) {
+  photos[key].splice(idx, 1);
+  renderList(key);
+  showToast('Фото удалено');
+}
+
+/* ═══════════════════════════════════════════
+   SHARED HTML SNIPPETS (header/footer)
+═══════════════════════════════════════════ */
+function sharedScripts() {
+  return `<script src="shared.js"><\/script>`;
+}
+
+function head(title, extra = '') {
+  return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="stylesheet" href="css/style.css">
+  ${extra}
+</head>
+<body>
+<div id="site-header"></div>`;
+}
+
+function foot() {
+  return `\n<div id="site-footer"></div>\n${sharedScripts()}\n</body>\n</html>`;
+}
+
+function v(id) { return document.getElementById(id).value; }
+
+/* ═══════════════════════════════════════════
+   CODE GENERATORS
+═══════════════════════════════════════════ */
+const generators = {
+
+  home() {
+    return head('Главная | Хостел «Второй Дом» — Казань') + `
+
+<section class="hero">
+  <img class="hero-bg" src="https://static.wixstatic.com/media/ed2355_7019d5cf54ce4a22b3521a14aa77e1f7~mv2_d_2016_1512_s_2.jpg/v1/crop/x_0,y_18,w_2016,h_1477/fill/w_1200,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_3450_JPG.jpg" alt="Хостел Второй Дом">
+  <div class="hero-content">
+    <p class="hero-eyebrow">${v('home-eyebrow')}</p>
+    <h1>${v('home-h1')}</h1>
+    <p>${v('home-sub')}</p>
+    <a href="booking.html" class="btn">Забронировать</a>
+    <a href="vagapova.html" class="btn btn-outline">Наши адреса</a>
+  </div>
+</section>
+
+<main>
+  <div class="info-grid">
+    <div class="info-box"><h4>${v('home-s1-label')}</h4><p>${v('home-s1-val')}</p></div>
+    <div class="info-box"><h4>${v('home-s2-label')}</h4><p>${v('home-s2-val')}</p></div>
+    <div class="info-box"><h4>${v('home-s3-label')}</h4><p>${v('home-s3-val')}</p></div>
+  </div>
+
+  <h2 class="section-title">Выберите хостел</h2>
+  <p class="section-sub">Оба расположены в Советском районе Казани — тихие спальные кварталы с развитой инфраструктурой.</p>
+  <div class="divider"></div>
+
+  <div class="cards">
+    <div class="card">
+      <img src="https://static.wixstatic.com/media/ed2355_7019d5cf54ce4a22b3521a14aa77e1f7~mv2_d_2016_1512_s_2.jpg/v1/crop/x_0,y_18,w_2016,h_1477/fill/w_600,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_3450_JPG.jpg" alt="Хостел Вагапова">
+      <div class="card-body">
+        <h3>ул. Рашида Вагапова, 5Г</h3>
+        <p>Работает с 2007 года. 280 мест, 49 номеров. Тихий микрорайон Азино-1, рядом ТЦ Мега и спортивные центры.</p>
+        <a href="vagapova.html" class="btn">Подробнее</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://static.wixstatic.com/media/ed2355_b47c46227cf64e338a4138f1d340a6bf~mv2.jpeg/v1/fill/w_600,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202020-07-23%20at%203_09_58%20PM_.jpeg" alt="Хостел Кутуя">
+      <div class="card-body">
+        <h3>ул. Аделя Кутуя, 86/2</h3>
+        <p>Открыт в 2019 году. 526 мест, 69 номеров. Все номера с душем и туалетом. Рядом Казанский ипподром и Парк Горького.</p>
+        <a href="kutua.html" class="btn">Подробнее</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 56px;">
+    <h2 class="section-title">В каждом хостеле</h2>
+    <div class="divider"></div>
+    <div class="info-grid">
+      <div class="info-box"><h4>Удобства в номерах</h4><p>Душ и туалет в большинстве номеров</p></div>
+      <div class="info-box"><h4>На этажах</h4><p>Оборудованные кухни</p></div>
+      <div class="info-box"><h4>Бесплатно</h4><p>Wi-Fi · Утюг · Гладильная доска</p></div>
+    </div>
+  </div>
+</main>` + foot();
+  },
+
+  vagapova() {
+    return head('Вагапова 5Г | Хостел «Второй Дом» — Казань') + `
+
+<div class="hero" style="padding: 48px 24px;">
+  <img class="hero-bg" src="https://static.wixstatic.com/media/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg/v1/fill/w_1200,h_400,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg" alt="">
+  <div class="hero-content">
+    <p class="hero-eyebrow">Хостел «Второй Дом»</p>
+    <h1 style="font-size:2rem;">ул. Рашида Вагапова, 5Г</h1>
+    <p>Казань, микрорайон Азино-1</p>
+  </div>
+</div>
+
+<main>
+  <div class="location-hero">
+    <p class="eyebrow">О хостеле</p>
+    <h2>Рашида Вагапова, 5Г</h2>
+    <p>${v('vag-desc1')}</p>
+    <p>${v('vag-desc2')}</p>
+    <div class="meta">
+      <span>📍 ${v('vag-addr')}</span>
+      <span>🛏 ${v('vag-beds')}</span>
+      <span>🚪 ${v('vag-rooms')}</span>
+      <span>🕐 Выезд 12:00 · Заезд 14:00</span>
+    </div>
+  </div>
+  <div class="info-grid">
+    <div class="info-box"><h4>Wi-Fi</h4><p>Бесплатный и быстрый</p></div>
+    <div class="info-box"><h4>Кухни</h4><p>На каждом этаже</p></div>
+    <div class="info-box"><h4>Дополнительно</h4><p>Утюг и гладильная доска</p></div>
+  </div>
+  <h2 class="section-title" style="margin-top:40px;">Бронирование</h2>
+  <div class="divider"></div>
+  <ul style="margin: 0 0 20px 20px; line-height: 2;">
+    <li>Лично в хостеле</li>
+    <li>По телефону: <a href="tel:${v('vag-phone').replace(/[^+\d]/g,'')}"><strong>${v('vag-phone')}</strong></a></li>
+    <li>По электронной почте: <a href="mailto:vtoroidom_brony@bk.ru">vtoroidom_brony@bk.ru</a></li>
+  </ul>
+  <a href="booking.html" class="btn">Контакты для бронирования</a>
+
+  <h2 class="section-title" style="margin-top: 48px;">Что есть рядом?</h2>
+  <p class="section-sub">Информацию о том, как добраться, можно узнать на ресепшене.</p>
+  <div class="divider"></div>
+  <div class="nearby">
+    <div class="nearby-block">
+      <h4>🏛 Достопримечательности</h4>
+      <ul>
+        <li>Кремлёвская набережная — 10 км, 40 мин.</li>
+        <li>Казанский кремль — 10 км, 1 ч.</li>
+        <li>Театр Кукол — 8,5 км, 35 мин.</li>
+        <li>Деревня Универсиады — 6 км, 23 мин.</li>
+        <li>Казанский зоопарк — 10 км, 50 мин.</li>
+        <li>Центр Семьи «Казан» — 12 км, 50 мин.</li>
+        <li>Чёрное Озеро — 8,5 км, 40 мин.</li>
+      </ul>
+    </div>
+    <div class="nearby-block">
+      <h4>🛍 Шопинг и развлечения</h4>
+      <ul>
+        <li>ТЦ Мега — 1,5 км, 20 мин. пешком</li>
+        <li>ТЦ Южный — 2,2 км, 25 мин. пешком</li>
+        <li>ТЦ Горький Парк — 6 км, 40 мин.</li>
+        <li>ГРК «Казанская Ривьера» — 10 км, 40 мин.</li>
+        <li>Кинотеатр Мираж — 1,5 км, 20 мин.</li>
+        <li>Кинотеатр Киномакс — 2,2 км, 25 мин.</li>
+      </ul>
+    </div>
+    <div class="nearby-block">
+      <h4>🍽 Кафе и рестораны</h4>
+      <ul>
+        <li>Добрая Столовая — 0,2 км, 3 мин.</li>
+        <li>Шаурмито — 0,4 км, 5 мин.</li>
+        <li>Окинава «Суши» — 0,4 км, 5 мин.</li>
+        <li>Фест (ресторан) — 2 км, 25 мин.</li>
+        <li>Брасерия — 1,3 км, 15 мин.</li>
+        <li>Старый Амбар — 1,6 км, 15 мин.</li>
+      </ul>
+    </div>
+  </div>
+</main>` + foot();
+  },
+
+  kutua() {
+    return head('А. Кутуя 86/2 | Хостел «Второй Дом» — Казань') + `
+
+<div class="hero" style="padding: 48px 24px;">
+  <img class="hero-bg" src="https://static.wixstatic.com/media/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg/v1/fill/w_1200,h_400,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg" alt="">
+  <div class="hero-content">
+    <p class="hero-eyebrow">Хостел «Второй Дом»</p>
+    <h1 style="font-size:2rem;">ул. Аделя Кутуя, 86/2</h1>
+    <p>Казань, Советский район</p>
+  </div>
+</div>
+
+<main>
+  <div class="location-hero">
+    <p class="eyebrow">О хостеле</p>
+    <h2>Аделя Кутуя, 86/2</h2>
+    <p>${v('kut-desc1')}</p>
+    <p>${v('kut-desc2')}</p>
+    <div class="meta">
+      <span>📍 ${v('kut-addr')}</span>
+      <span>🛏 ${v('kut-beds')}</span>
+      <span>🚪 ${v('kut-rooms')}</span>
+      <span>🕐 Выезд 12:00 · Заезд 14:00</span>
+    </div>
+  </div>
+  <div class="info-grid">
+    <div class="info-box"><h4>Душ и туалет</h4><p>Во всех номерах</p></div>
+    <div class="info-box"><h4>Кухни</h4><p>На каждом этаже</p></div>
+    <div class="info-box"><h4>Дополнительно</h4><p>Wi-Fi · Утюг · Гладильная доска</p></div>
+  </div>
+  <h2 class="section-title" style="margin-top:40px;">Бронирование</h2>
+  <div class="divider"></div>
+  <ul style="margin: 0 0 20px 20px; line-height: 2;">
+    <li>Лично в хостеле</li>
+    <li>По телефону: <a href="tel:${v('kut-phone').replace(/[^+\d]/g,'')}"><strong>${v('kut-phone')}</strong></a></li>
+    <li>По электронной почте: <a href="mailto:vtoroidom_brony@bk.ru">vtoroidom_brony@bk.ru</a></li>
+  </ul>
+  <a href="booking.html" class="btn">Контакты для бронирования</a>
+
+  <h2 class="section-title" style="margin-top: 48px;">Что есть рядом?</h2>
+  <p class="section-sub">Информацию о том, как добраться, можно узнать на ресепшене.</p>
+  <div class="divider"></div>
+  <div class="nearby">
+    <div class="nearby-block">
+      <h4>🏛 Достопримечательности</h4>
+      <ul>
+        <li>Кремлёвская набережная — 5 км, 40 мин.</li>
+        <li>Казанский кремль — 6 км, 40 мин.</li>
+        <li>Ак Барс Арена — 8 км, 50 мин.</li>
+        <li>Театр оперы и балета — 5 км, 20 мин.</li>
+        <li>Набережная озера Кабан — 5 км, 40 мин.</li>
+        <li>Центр Семьи «Казан» — 8 км, 40 мин.</li>
+        <li>Чёрное Озеро — 5 км, 30 мин.</li>
+      </ul>
+    </div>
+    <div class="nearby-block">
+      <h4>🛍 Шопинг и развлечения</h4>
+      <ul>
+        <li>ТЦ Мега — 2,5 км, 30 мин. пешком</li>
+        <li>ТЦ Престиж — 0,8 км, 10 мин. пешком</li>
+        <li>ТЦ Южный — 3,5 км, 20 мин.</li>
+        <li>ГРК «Казанская Ривьера» — 7 км, 35 мин.</li>
+        <li>Кинотеатр Мир — 3 км, 15 мин.</li>
+        <li>Кинотеатр Киномакс — 2,2 км, 25 мин.</li>
+      </ul>
+    </div>
+    <div class="nearby-block">
+      <h4>🍽 Кафе и рестораны</h4>
+      <ul>
+        <li>Suzma — 0,6 км, 8 мин.</li>
+        <li>#TD_Lounge Cafe — 1 км, 12 мин.</li>
+        <li>Foodstory — 1,3 км, 15 мин.</li>
+        <li>Онегин — 0,6 км, 8 мин.</li>
+        <li>Love.Ashe — 1 км, 12 мин.</li>
+        <li>Кафе 24 — 0,7 км, 9 мин.</li>
+      </ul>
+    </div>
+  </div>
+</main>` + foot();
+  },
+
+  booking() {
+    return head('Бронирование | Хостел «Второй Дом» — Казань') + `
+
+<main>
+  <h1 class="section-title">Бронирование</h1>
+  <p class="section-sub">Выберите удобный способ — свяжитесь с нужным хостелом напрямую.</p>
+  <div class="divider"></div>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>ул. Рашида Вагапова, 5Г</h3>
+      <div class="contact-row"><span class="label">Телефон</span><span class="value"><a href="tel:${v('bk-phone-vag').replace(/[^+\d]/g,'')}">${v('bk-phone-vag')}</a></span></div>
+      <div class="contact-row"><span class="label">E-mail</span><span class="value"><a href="mailto:${v('bk-email')}">${v('bk-email')}</a></span></div>
+      <div style="margin-top: 20px;"><a href="tel:${v('bk-phone-vag').replace(/[^+\d]/g,'')}" class="btn">Позвонить</a></div>
+    </div>
+    <div class="contact-card">
+      <h3>ул. Аделя Кутуя, 86/2</h3>
+      <div class="contact-row"><span class="label">Телефон</span><span class="value"><a href="tel:${v('bk-phone-kut').replace(/[^+\d]/g,'')}">${v('bk-phone-kut')}</a></span></div>
+      <div class="contact-row"><span class="label">E-mail</span><span class="value"><a href="mailto:${v('bk-email')}">${v('bk-email')}</a></span></div>
+      <div style="margin-top: 20px;"><a href="tel:${v('bk-phone-kut').replace(/[^+\d]/g,'')}" class="btn">Позвонить</a></div>
+    </div>
+  </div>
+  <div style="background: var(--light); border-radius: 10px; padding: 28px 32px; margin-top: 40px;">
+    <h3 style="color: var(--navy); margin-bottom: 14px;">📋 Расчётный час</h3>
+    <p style="font-size: .95rem; color: #333;"><strong>Выезд:</strong> ${v('bk-checkout')} · <strong>Заезд:</strong> ${v('bk-checkin')} по местному времени.</p>
+  </div>
+  <div style="background: var(--light); border-radius: 10px; padding: 28px 32px; margin-top: 20px;">
+    <h3 style="color: var(--navy); margin-bottom: 14px;">💳 Способы оплаты</h3>
+    <ul style="margin-left: 20px; line-height: 2; font-size: .95rem; color: #333;">
+      <li>Безналичным банковским переводом</li>
+      <li>Наличными денежными средствами</li>
+      <li>Банковской картой в хостеле (МИР, Visa, Mastercard)</li>
+    </ul>
+  </div>
+</main>` + foot();
+  },
+
+  about() {
+    return head('О нас | Хостел «Второй Дом» — Казань') + `
+
+<main>
+  <h1 class="section-title">О нас</h1>
+  <p class="section-sub">Реквизиты, документы и общая информация.</p>
+  <div class="divider"></div>
+  <div class="requisites">
+    <h3>Реквизиты</h3>
+    <table class="req-table">
+      <tr><td>Наименование</td><td>${v('ab-name')}</td></tr>
+      <tr><td>ОГРН</td><td>${v('ab-ogrn')}</td></tr>
+      <tr><td>ИНН</td><td>${v('ab-inn')}</td></tr>
+      <tr><td>Р/сч</td><td>${v('ab-rsch')}</td></tr>
+      <tr><td>Банк</td><td>${v('ab-bank')}</td></tr>
+      <tr><td>К/с</td><td>${v('ab-ksch')}</td></tr>
+      <tr><td>БИК</td><td>${v('ab-bik')}</td></tr>
+    </table>
+  </div>
+  <h2 class="section-title" style="margin-top: 48px;">Контакты</h2>
+  <div class="divider"></div>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>Общий контакт</h3>
+      <div class="contact-row"><span class="label">E-mail</span><span class="value"><a href="mailto:vtoroidom@bk.ru">vtoroidom@bk.ru</a></span></div>
+      <div class="contact-row"><span class="label">ВКонтакте</span><span class="value"><a href="https://vk.com/2vtoroidom" target="_blank">vk.com/2vtoroidom</a></span></div>
+    </div>
+    <div class="contact-card">
+      <h3>Телефоны</h3>
+      <div class="contact-row"><span class="label">Вагапова</span><span class="value"><a href="tel:+78432764404">+7 (843) 276-44-04</a></span></div>
+      <div class="contact-row"><span class="label">Кутуя</span><span class="value"><a href="tel:+79869340486">+7 (986) 934-04-86</a></span></div>
+    </div>
+  </div>
+</main>` + foot();
+  },
+
+  photos() {
+    const vagPhotos = photos.vag.map((url, i) => `
+    <a href="#" data-src="${url}">
+      <img src="${url}" alt="Вагапова — фото ${i+1}" loading="lazy">
+    </a>`).join('');
+
+    const kutPhotos = photos.kut.map((url, i) => `
+    <a href="#" data-src="${url}">
+      <img src="${url}" alt="Кутуя — фото ${i+1}" loading="lazy">
+    </a>`).join('');
+
+    return head('Фото | Хостел «Второй Дом» — Казань', `<style>
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .photo-grid a { display: block; overflow: hidden; border-radius: 8px; aspect-ratio: 4/3; }
+    .photo-grid a img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; display: block; }
+    .photo-grid a:hover img { transform: scale(1.04); opacity: .9; }
+    #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; align-items: center; justify-content: center; padding: 24px; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; }
+    #lightbox-close { position: fixed; top: 20px; right: 24px; color: white; font-size: 2rem; cursor: pointer; background: none; border: none; }
+    @media (max-width: 600px) { .photo-grid { grid-template-columns: 1fr 1fr; } }
+  </style>`) + `
+
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<main>
+  <h1 class="section-title">Фото</h1>
+  <div class="divider"></div>
+
+  <h2 style="font-size:1.1rem; color: var(--navy); margin-bottom: 16px;">ул. Рашида Вагапова, 5Г</h2>
+  <div class="photo-grid">${vagPhotos}
+  </div>
+
+  <h2 style="font-size:1.1rem; color: var(--navy); margin: 40px 0 16px;">ул. Аделя Кутуя, 86/2</h2>
+  <div class="photo-grid">${kutPhotos}
+  </div>
+</main>` + foot() + `
+<script>
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  document.getElementById('lightbox-close').addEventListener('click', () => lb.classList.remove('open'));
+  lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+  document.querySelectorAll('.photo-grid a').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); lbImg.src = a.dataset.src; lb.classList.add('open'); });
+  });
+<\/script>`;
+  }
+};
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+let currentCode = '';
+
+const fileNames = { home: 'index.html', vagapova: 'vagapova.html', kutua: 'kutua.html', booking: 'booking.html', about: 'about.html', photos: 'photos.html' };
+
+function generatePage(key) {
+  currentCode = generators[key]();
+  const fname = fileNames[key];
+  document.getElementById('modal-title').textContent = `Готовый код — ${fname}`;
+  document.getElementById('modal-code').textContent = currentCode;
+  document.getElementById('copy-btn').textContent = 'Скопировать';
+  document.getElementById('copy-btn').classList.remove('copied');
+  document.getElementById('output-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('output-modal').classList.remove('open');
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(currentCode).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Скопировано ✓';
+    btn.classList.add('copied');
+    showToast('Код скопирован в буфер обмена');
+  });
+}
+
+document.getElementById('output-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('output-modal')) closeModal();
+});
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>

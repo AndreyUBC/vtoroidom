@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Фото | Хостел «Второй Дом» — Казань</title>
+  <meta name="description" content="Фотографии хостела «Второй Дом» в Казани.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .photo-grid a {
+      display: block;
+      overflow: hidden;
+      border-radius: 8px;
+      aspect-ratio: 4/3;
+    }
+    .photo-grid a img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .3s, opacity .2s;
+      display: block;
+    }
+    .photo-grid a:hover img { transform: scale(1.04); opacity: .9; }
+
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+    #lightbox-close {
+      position: fixed;
+      top: 20px; right: 24px;
+      color: white; font-size: 2rem; cursor: pointer;
+      background: none; border: none; line-height: 1;
+    }
+
+    @media (max-width: 600px) {
+      .photo-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<main>
+
+  <h1 class="section-title">Фото</h1>
+  <div class="divider"></div>
+
+  <h2 style="font-size:1.1rem; color: var(--navy); margin-bottom: 16px;">ул. Рашида Вагапова, 5Г</h2>
+  <div class="photo-grid" id="gallery-vagapova">
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_7019d5cf54ce4a22b3521a14aa77e1f7~mv2_d_2016_1512_s_2.jpg/v1/crop/x_0,y_9,w_2016,h_1313/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_3450_JPG.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_7019d5cf54ce4a22b3521a14aa77e1f7~mv2_d_2016_1512_s_2.jpg/v1/crop/x_0,y_9,w_2016,h_1313/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_3450_JPG.jpg" alt="Хостел Вагапова — фото 1" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_ff3a4bf17bc54d73b542bb049464ed98~mv2.jpg" alt="Хостел Вагапова — фото 2" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_aca10c708c734e7291346830c040f980~mv2.jpg" alt="Хостел Вагапова — фото 3" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_4b720b3480ce4e1086e439e0cc74a138~mv2.jpg" alt="Хостел Вагапова — фото 4" loading="lazy">
+    </a>
+  </div>
+
+  <h2 style="font-size:1.1rem; color: var(--navy); margin: 40px 0 16px;">ул. Аделя Кутуя, 86/2</h2>
+  <div class="photo-grid" id="gallery-kutua">
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_b47c46227cf64e338a4138f1d340a6bf~mv2.jpeg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202020-07-23%20at%203_09_58%20PM_.jpeg">
+      <img src="https://static.wixstatic.com/media/ed2355_b47c46227cf64e338a4138f1d340a6bf~mv2.jpeg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202020-07-23%20at%203_09_58%20PM_.jpeg" alt="Хостел Кутуя — фото 1" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_9f2b3e8f568747a2bc8e76323ede1986~mv2.jpg" alt="Хостел Кутуя — фото 2" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg">
+      <img src="https://static.wixstatic.com/media/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_edc02cf6d7bf49b9bba1695c353ed1e4~mv2.jpg" alt="Хостел Кутуя — фото 3" loading="lazy">
+    </a>
+    <a href="#" data-src="https://static.wixstatic.com/media/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg/v1/fill/w_800,h_600,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg">
+      <img src="https://static.wixstatic.com/media/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg/v1/fill/w_480,h_360,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ed2355_131117f562cc4dd68ac5c4731c85e6ab~mv2.jpeg" alt="Хостел Кутуя — фото 4" loading="lazy">
+    </a>
+  </div>
+
+  <p style="color: var(--gray); font-size: .88rem; margin-top: 20px;">
+    Хотите добавить больше фотографий? Свяжитесь с нами: <a href="mailto:vtoroidom@bk.ru">vtoroidom@bk.ru</a>
+  </p>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="shared.js"></script>
+<script>
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  const lbClose = document.getElementById('lightbox-close');
+
+  document.querySelectorAll('.photo-grid a').forEach(a => {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      lbImg.src = this.dataset.src;
+      lb.classList.add('open');
+    });
+  });
+
+  lbClose.addEventListener('click', () => lb.classList.remove('open'));
+  lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+</script>
+</body>
+</html>
